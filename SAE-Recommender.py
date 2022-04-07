@@ -56,6 +56,7 @@ class SAE(nn.Module):
         self.fc10 = nn.Linear(200, nb_movies)
         self.activation1 = nn.Sigmoid()
         self.activation2 = nn.ReLU()
+        self.activation3 = nn.Softmax(dim=5)
     def forward(self, x):
         x = self.activation2(self.fc1(x))
         x = self.activation2(self.fc2(x))
@@ -86,31 +87,35 @@ class SAE(nn.Module):
                     s += 1.
                     optimizer.step()
             print('epoch: '+str(epoch)+' Train loss: '+str(train_loss/s))
-    def test(self, criterion):
+    @staticmethod
+    def test(model, criterion):
+        # Testing the SAE
         test_loss = 0
         s = 0.
         for id_user in range(nb_users):
             input = Variable(training_set[id_user]).unsqueeze(0)
-            target = Variable(test_set[id_user])
+            target = Variable(test_set[id_user]).unsqueeze(0)
             if torch.sum(target.data > 0) > 0:
-                output = self(input)
+                output = model(input)
                 target.require_grad = False
                 output[target == 0] = 0
                 loss = criterion(output, target)
                 mean_corrector = nb_movies/float(torch.sum(target.data > 0) + 1e-10)
-                test_loss += np.sqrt(loss.data[0]*mean_corrector)
+                test_loss += np.sqrt(loss.data*mean_corrector)
                 s += 1.
         print('test loss: '+str(test_loss/s))
+        
 
 
 sae = SAE()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(sae.parameters(), lr=0.01, weight_decay = 0.5)
+optimizer = optim.Adam(sae.parameters(), lr=0.01)
 
 # Training (error between real rating and predicted for example if loss==1 
 # it means real rating and predicted rating will be different by 1 star 
 # (our recommender system is 1 to 5 star rating per movie))
-sae.train(criterion = criterion, optimizer = optimizer, nb_epoch=20)
+sae.train(criterion = criterion, optimizer = optimizer, nb_epoch=10)
 
 # Test
-sae.test(criterion = criterion)
+SAE.test(sae,criterion = criterion)
+
