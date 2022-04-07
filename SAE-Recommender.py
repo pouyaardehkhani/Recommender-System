@@ -114,7 +114,7 @@ optimizer = optim.Adam(sae.parameters(), lr=0.01)
 # Training (error between real rating and predicted for example if loss==1 
 # it means real rating and predicted rating will be different by 1 star 
 # (our recommender system is 1 to 5 star rating per movie))
-sae.train(criterion = criterion, optimizer = optimizer, nb_epoch=10)
+sae.train(criterion = criterion, optimizer = optimizer, nb_epoch=20)
 
 # Test
 SAE.test(sae,criterion = criterion)
