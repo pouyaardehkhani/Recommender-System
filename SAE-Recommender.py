@@ -56,17 +56,18 @@ class SAE(nn.Module):
         self.fc10 = nn.Linear(200, nb_movies)
         self.activation1 = nn.Sigmoid()
         self.activation2 = nn.ReLU()
-        self.activation3 = nn.Softmax(dim=5)
+        self.activation3 = nn.SiLU()
+        self.activation4 = nn.Tanh()
     def forward(self, x):
         x = self.activation2(self.fc1(x))
         x = self.activation2(self.fc2(x))
         x = self.activation2(self.fc3(x))
-        x = self.activation1(self.fc4(x))
+        x = self.activation4(self.fc4(x))
         x = self.activation1(self.fc5(x))
         x = self.activation1(self.fc6(x))
-        x = self.activation1(self.fc7(x))
+        x = self.activation4(self.fc7(x))
         x = self.activation2(self.fc8(x))
-        x = self.activation2(self.fc9(x))
+        x = self.activation3(self.fc9(x))
         x = self.fc10(x)
         return x
     def train(self, criterion, optimizer, nb_epoch):
@@ -109,7 +110,7 @@ class SAE(nn.Module):
 
 sae = SAE()
 criterion = nn.MSELoss()
-optimizer = optim.Adam(sae.parameters(), lr=0.01)
+optimizer = optim.Adam(sae.parameters(), lr=0.01, weight_decay = 0.5)
 
 # Training (error between real rating and predicted for example if loss==1 
 # it means real rating and predicted rating will be different by 1 star 
